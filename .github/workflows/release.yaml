@@ -18,12 +18,8 @@ jobs:
       fail-fast: false # don't fail fast as sometimes failures are operating system specific.
       matrix:
         os:
-          - "macos-11"
           - "ubuntu-18.04"
         mode:
-          - "default"
-          # By default we use libc++.
-          - "clang"
           - "clang-fips"
     steps:
       - name: Cancel when duplicated
@@ -120,9 +116,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist-Linux-default/**/*.tar.gz
-            dist-Linux-clang/**/*.tar.gz
             dist-Linux-clang-fips/**/*.tar.gz
-            dist-macOS-default/**/*.tar.gz
-            dist-macOS-clang/**/*.tar.gz
-            dist-macOS-clang-fips/**/*.tar.gz
