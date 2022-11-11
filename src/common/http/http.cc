@@ -73,12 +73,6 @@ bool IsOIDCCodeSafeCharacter(const char character) {
   return IsUrlSafeCharacter(character) || (character == '/');
 }
 
-std::string GetOpenSSLErrorString(unsigned long err) {
-  std::array<char, 256> errBuff;
-  ERR_error_string_n(err, errBuff.data(), errBuff.size());
-  return std::string(errBuff.data());
-}
-
 std::string SafeEncode(absl::string_view in, SafeCharacterFunc IsSafe) {
   std::stringstream builder;
   for (auto character : in) {
