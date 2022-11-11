@@ -424,7 +424,7 @@ response_t HttpImpl::Post(
           boost::asio::buffer(options.ca_cert_.data(), options.ca_cert_.size()),
           ca_ec);
       if (ca_ec) {
-        spdlog::error("{}: Got error code", __func__, ca_ec);
+        spdlog::error("{}: Got error code: {}", __func__, ca_ec);
         ca_ec.clear();
       }
     }
@@ -544,7 +544,7 @@ response_t HttpImpl::Get(
           boost::asio::buffer(options.ca_cert_.data(), options.ca_cert_.size()),
           ca_ec);
       if (ca_ec) {
-        spdlog::error("{}: Got error code", __func__, ca_ec);
+        spdlog::error("{}: Got error code: {}", __func__, ca_ec);
         ca_ec.clear();
       }
     }
