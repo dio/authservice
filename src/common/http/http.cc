@@ -427,13 +427,12 @@ response_t HttpImpl::Post(
       if (ca_ec) {
         auto err = ERR_peek_last_error();
 
-        spdlog::info("Get certificate authority error {}: {}: reason: {}, ec message: {}, ec what: {}",
-                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__, ca_ec.message(), ca_ec.what());
+        spdlog::info("Get certificate authority error {}: {}: reason: {}, ec message: {}, ec value: {}",
+                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__, ca_ec.message(), ca_ec.value());
 
         // We can ignore this error. Reference:
         // https://github.com/facebook/folly/blob/d3354e2282303402e70d829d19bfecce051a5850/folly/ssl/OpenSSLCertUtils.cpp#L367-L368.
-        if (ERR_GET_LIB(err) != ERR_LIB_X509 ||
-            ERR_GET_REASON(err) != X509_R_CERT_ALREADY_IN_HASH_TABLE) {
+        if (ca_ec.message().find("CERT_ALREADY_IN_HASH_TABLE") != std::string::npos) {
           throw boost::system::system_error{ca_ec};
         }
       }
