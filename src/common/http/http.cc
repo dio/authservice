@@ -433,7 +433,7 @@ response_t HttpImpl::Post(
         // We can ignore this error. Reference:
         // https://github.com/facebook/folly/blob/d3354e2282303402e70d829d19bfecce051a5850/folly/ssl/OpenSSLCertUtils.cpp#L367-L368.
         if (!hash_error) {
-          spdlog::info("error isn't CERT_ALREADY_IN_HASH_TABLE")
+          spdlog::info("error isn't CERT_ALREADY_IN_HASH_TABLE");
           throw boost::system::system_error{ca_ec};
         }
       }
