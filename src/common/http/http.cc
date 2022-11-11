@@ -73,6 +73,12 @@ bool IsOIDCCodeSafeCharacter(const char character) {
   return IsUrlSafeCharacter(character) || (character == '/');
 }
 
+std::string GetOpenSSLErrorString(unsigned long err) {
+  std::array<char, 256> errBuff;
+  ERR_error_string_n(err, errBuff.data(), errBuff.size());
+  return std::string(errBuff.data());
+}
+
 std::string SafeEncode(absl::string_view in, SafeCharacterFunc IsSafe) {
   std::stringstream builder;
   for (auto character : in) {
@@ -419,22 +425,13 @@ response_t HttpImpl::Post(
 
     if (!options.ca_cert_.empty()) {
       spdlog::info("{}: Trusting the provided certificate authority", __func__);
-      beast::error_code ca_ec;
+      boost::system::error_code ca_ec;
       ctx.add_certificate_authority(
           boost::asio::buffer(options.ca_cert_.data(), options.ca_cert_.size()),
           ca_ec);
       if (ca_ec) {
-        auto err = ERR_get_error();
-
-        spdlog::info("Get certificate authority error {}: {}: reason: {}",
-                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__);
-
-        // We can ignore this error. Reference:
-        // https://github.com/facebook/folly/blob/d3354e2282303402e70d829d19bfecce051a5850/folly/ssl/OpenSSLCertUtils.cpp#L367-L368.
-        if (ERR_GET_LIB(err) != ERR_LIB_X509 ||
-            ERR_GET_REASON(err) != X509_R_CERT_ALREADY_IN_HASH_TABLE) {
-          throw boost::system::system_error{ca_ec};
-        }
+        spdlog::error("{}: Got error code", __func__, ca_ec);
+        ca_ec.clear();
       }
     }
 
@@ -548,22 +545,13 @@ response_t HttpImpl::Get(
 
     if (!options.ca_cert_.empty()) {
       spdlog::info("{}: Trusting the provided certificate authority", __func__);
-      beast::error_code ca_ec;
+      boost::system::error_code ca_ec;
       ctx.add_certificate_authority(
           boost::asio::buffer(options.ca_cert_.data(), options.ca_cert_.size()),
           ca_ec);
       if (ca_ec) {
-        auto err = ERR_get_error();
-
-        spdlog::info("Get certificate authority error {}: {}: reason: {}",
-                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__);
-
-        // We can ignore this error. Reference:
-        // https://github.com/facebook/folly/blob/d3354e2282303402e70d829d19bfecce051a5850/folly/ssl/OpenSSLCertUtils.cpp#L367-L368.
-        if (ERR_GET_LIB(err) != ERR_LIB_X509 ||
-            ERR_GET_REASON(err) != X509_R_CERT_ALREADY_IN_HASH_TABLE) {
-          throw boost::system::system_error{ca_ec};
-        }
+        spdlog::error("{}: Got error code", __func__, ca_ec);
+        ca_ec.clear();
       }
     }
 
