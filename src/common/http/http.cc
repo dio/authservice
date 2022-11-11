@@ -425,9 +425,10 @@ response_t HttpImpl::Post(
           ca_ec);
       ERR_clear_error();
       if (ca_ec) {
-        auto err = ERR_get_error();
-        spdlog::info("Get certificate authority error {}: {}: reason: {}, ec message: {}",
-                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__, ca_ec.message());
+        auto err = ERR_peek_last_error();
+
+        spdlog::info("Get certificate authority error {}: {}: reason: {}, ec message: {}, ec what: {}",
+                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__, ca_ec.message(), ca_ec.what());
 
         // We can ignore this error. Reference:
         // https://github.com/facebook/folly/blob/d3354e2282303402e70d829d19bfecce051a5850/folly/ssl/OpenSSLCertUtils.cpp#L367-L368.
