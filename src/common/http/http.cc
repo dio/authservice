@@ -423,16 +423,17 @@ response_t HttpImpl::Post(
       ctx.add_certificate_authority(
           boost::asio::buffer(options.ca_cert_.data(), options.ca_cert_.size()),
           ca_ec);
-      ERR_clear_error();
       if (ca_ec) {
-        auto err = ERR_peek_last_error();
-
-        spdlog::info("Get certificate authority error {}: {}: reason: {}, ec message: {}, ec value: {}",
-                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__, ca_ec.message(), ca_ec.value());
+        unsigned long err = ERR_peek_last_error();
+        std::string ca_message = ca_ec.message();
+        bool hash_error = ca_message.find("CERT_ALREADY_IN_HASH_TABLE") != std::string::npos;
+        spdlog::info("Get certificate authority error {}: {}: reason: {}, ec message: {}",
+                     ERR_GET_LIB(err), ERR_GET_REASON(err), __func__, ca_ec.message());
 
         // We can ignore this error. Reference:
         // https://github.com/facebook/folly/blob/d3354e2282303402e70d829d19bfecce051a5850/folly/ssl/OpenSSLCertUtils.cpp#L367-L368.
-        if (ca_ec.message().find("CERT_ALREADY_IN_HASH_TABLE") != std::string::npos) {
+        if (!hash_error) {
+          spdlog::info("error isn't CERT_ALREADY_IN_HASH_TABLE")
           throw boost::system::system_error{ca_ec};
         }
       }
